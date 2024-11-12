@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, send_file
+from flask import render_template, request, redirect, url_for, flash, send_file, jsonify
 from models import db, User, Transaction
 import csv
 from io import BytesIO, StringIO
@@ -41,10 +41,16 @@ def register_routes(app):
             transactions_points = Transaction.query.order_by(Transaction.points.desc()).limit(10).all()
             transactions_count = Transaction.query.order_by(Transaction.count.desc()).limit(10).all()
             transactions_amount = Transaction.query.order_by(Transaction.amount.desc()).limit(10).all()
+
+            # Convert SQLAlchemy objects to dictionaries for JSON serialization
+            points_data = [{'user_id': t.user_id, 'points': t.points} for t in transactions_points]
+            count_data = [{'user_id': t.user_id, 'count': t.count} for t in transactions_count]
+            amount_data = [{'user_id': t.user_id, 'amount': t.amount} for t in transactions_amount]
+
             return render_template('leaderboard.html', 
-                                transactions_points=transactions_points,
-                                transactions_count=transactions_count,
-                                transactions_amount=transactions_amount)
+                                transactions_points=points_data,
+                                transactions_count=count_data,
+                                transactions_amount=amount_data)
         except Exception as e:
             flash('Error loading leaderboard data.', 'error')
             return redirect(url_for('index'))

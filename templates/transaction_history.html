@@ -13,7 +13,27 @@
             </div>
             
             <div class="row">
-                <div class="col-md-4 mb-4">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Points Breakdown</h5>
+                            <canvas id="pointsBreakdownChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Transaction Statistics</h5>
+                            <canvas id="statsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Transaction Stats</h5>
@@ -27,10 +47,10 @@
                     </div>
                 </div>
                 
-                <div class="col-md-8 mb-4">
+                <div class="col-md-6 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Points Breakdown</h5>
+                            <h5 class="card-title">Points Details</h5>
                             <ul class="list-unstyled">
                                 <li>Base Transaction Points: {{ transaction.count * 10 }}</li>
                                 <li>Amount Based Points: {{ (transaction.amount / 100)|int }}</li>
@@ -55,4 +75,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const transactionData = {
+            base_points: {{ transaction.count * 10 }},
+            amount_points: {{ (transaction.amount / 100)|int }},
+            large_bonus: {{ (transaction.amount / 1000)|int * 50 }},
+            frequency_bonus: {{ transaction.transaction_frequency * 5 }},
+            streak_bonus: {{ transaction.weekly_streak * 25 }},
+            count: {{ transaction.count }},
+            weekly_streak: {{ transaction.weekly_streak }},
+            transaction_frequency: {{ transaction.transaction_frequency }}
+        };
+        createTransactionHistoryCharts(transactionData);
+    });
+</script>
 {% endblock %}

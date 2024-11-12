@@ -15,7 +15,8 @@
                 <h3>Top Points</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <canvas id="pointsChart"></canvas>
+                <div class="table-responsive mt-3">
                     <table class="table">
                         <thead>
                             <tr>
@@ -45,7 +46,8 @@
                 <h3>Top Transaction Counts</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <canvas id="countChart"></canvas>
+                <div class="table-responsive mt-3">
                     <table class="table">
                         <thead>
                             <tr>
@@ -75,7 +77,8 @@
                 <h3>Top Transaction Amounts</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <canvas id="amountChart"></canvas>
+                <div class="table-responsive mt-3">
                     <table class="table">
                         <thead>
                             <tr>
@@ -99,4 +102,16 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pointsData = {{ transactions_points|tojson }};
+        const countData = {{ transactions_count|tojson }};
+        const amountData = {{ transactions_amount|tojson }};
+        createLeaderboardCharts(pointsData, countData, amountData);
+    });
+</script>
 {% endblock %}
