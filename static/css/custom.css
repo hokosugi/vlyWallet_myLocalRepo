@@ -1,0 +1,20 @@
+.card {
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+}
+
+.table th {
+    border-top: none;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    border-radius: 6px;
+}

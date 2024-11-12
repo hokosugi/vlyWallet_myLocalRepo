@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4">Welcome to Vly.money Leaderboard</h1>
+    <p class="lead">Track your transaction metrics and compete with other users!</p>
+    <div class="mt-4">
+        <a href="{{ url_for('register') }}" class="btn btn-secondary me-2">Register</a>
+        <a href="{{ url_for('leaderboard') }}" class="btn btn-primary">View Leaderboard</a>
+    </div>
+</div>
+{% endblock %}
