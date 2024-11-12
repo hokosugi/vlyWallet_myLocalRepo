@@ -21,15 +21,13 @@ def update_transactions():
             # Mock data for demonstration
             transaction = Transaction.query.filter_by(user_id=user.id).first()
             if not transaction:
-                transaction = Transaction(
-                    user_id=user.id,
-                    last_transaction_date=datetime.utcnow()
-                )
+                transaction = Transaction(user_id=user.id)
+                transaction.last_transaction_date = datetime.utcnow()
                 db.session.add(transaction)
             
             # Update transaction data
-            transaction.count += 1  # Mock increment
-            transaction.amount += 100.0  # Mock amount
+            transaction.count += 1
+            transaction.amount += 100.0
             
             # Update streak and frequency before calculating points
             transaction.update_streak_and_frequency()

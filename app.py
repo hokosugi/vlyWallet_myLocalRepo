@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,  # Changed to DEBUG for more verbose logging
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def create_app():
     
     # Configure Flask app
     flask_app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
-    flask_app.debug = True  # Enable debug mode
+    flask_app.debug = True
     
     # Database configuration with error handling
     try:
@@ -25,7 +25,7 @@ def create_app():
             logger.error("DATABASE_URL environment variable not set!")
             raise ValueError("DATABASE_URL must be set")
         
-        logger.debug(f"Configuring database with URL: {database_url.split('@')[1]}")  # Log sanitized URL
+        logger.debug(f"Configuring database with URL: {database_url.split('@')[1]}")
         
         # Configure SQLAlchemy
         flask_app.config["SQLALCHEMY_DATABASE_URI"] = database_url
@@ -43,7 +43,7 @@ def create_app():
         
         with flask_app.app_context():
             # Import models and views after app initialization
-            from models import User, Transaction  # noqa: F401
+            from models import User, Transaction
             from views import register_routes
             from vly_api import update_transactions
             from scheduler import start_scheduler
@@ -57,7 +57,7 @@ def create_app():
                 db.create_all()
                 logger.info("Database tables created successfully")
                 
-                # Start scheduler
+                # Start scheduler for weekly updates
                 start_scheduler(update_transactions)
                 logger.info("Transaction update scheduler started")
                 
@@ -82,4 +82,4 @@ app = create_app()
 
 if __name__ == "__main__":
     logger.info("Starting Flask application...")
-    app.run(host="0.0.0.0", port=5000, debug=True)  # Changed back to port 5000
+    app.run(host="0.0.0.0", port=5000, debug=True)
