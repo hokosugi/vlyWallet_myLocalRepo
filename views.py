@@ -38,9 +38,11 @@ def register_routes(app):
     @app.route('/leaderboard')
     def leaderboard():
         try:
+            transactions_points = Transaction.query.order_by(Transaction.points.desc()).limit(10).all()
             transactions_count = Transaction.query.order_by(Transaction.count.desc()).limit(10).all()
             transactions_amount = Transaction.query.order_by(Transaction.amount.desc()).limit(10).all()
             return render_template('leaderboard.html', 
+                                transactions_points=transactions_points,
                                 transactions_count=transactions_count,
                                 transactions_amount=transactions_amount)
         except Exception as e:
@@ -54,11 +56,11 @@ def register_routes(app):
             string_buffer = StringIO()
             writer = csv.writer(string_buffer)
             
-            writer.writerow(['User ID', 'Transaction Count', 'Total Amount', 'Last Updated'])
+            writer.writerow(['User ID', 'Transaction Count', 'Total Amount', 'Points', 'Last Updated'])
             
             transactions = Transaction.query.all()
             for t in transactions:
-                writer.writerow([str(t.user_id), t.count, t.amount, t.last_updated])
+                writer.writerow([str(t.user_id), t.count, t.amount, t.points, t.last_updated])
             
             output.write(string_buffer.getvalue().encode('utf-8'))
             string_buffer.close()

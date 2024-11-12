@@ -24,6 +24,7 @@ def update_transactions():
             # Update transaction data
             transaction.count += 1  # Mock increment
             transaction.amount += 100.0  # Mock amount
+            transaction.calculate_points()  # Calculate points
             transaction.last_updated = datetime.utcnow()
             
             db.session.commit()

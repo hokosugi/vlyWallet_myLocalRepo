@@ -11,4 +11,12 @@ class Transaction(db.Model):
     user_id = db.Column(db.String(64), db.ForeignKey('user.id'), nullable=False)
     count = db.Column(db.Integer, default=0)
     amount = db.Column(db.Float, default=0.0)
+    points = db.Column(db.Integer, default=0)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def calculate_points(self):
+        """Calculate points based on transaction count and amount"""
+        transaction_points = self.count * 10  # 10 points per transaction
+        amount_points = int(self.amount / 100)  # 1 point per $100
+        self.points = transaction_points + amount_points
+        return self.points
