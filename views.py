@@ -49,6 +49,33 @@ def register_routes(app):
             flash('Error loading leaderboard data.', 'error')
             return redirect(url_for('index'))
 
+    @app.route('/transaction-history', methods=['GET', 'POST'])
+    def transaction_history_search():
+        if request.method == 'POST':
+            user_id = request.form.get('user_id')
+            if not user_id:
+                flash('Please enter a valid User ID', 'error')
+                return redirect(url_for('transaction_history_search'))
+            return redirect(url_for('transaction_history', user_id=user_id))
+        return render_template('transaction_history_search.html')
+
+    @app.route('/transaction-history/<user_id>')
+    def transaction_history(user_id):
+        try:
+            user = User.query.get_or_404(user_id)
+            transaction = Transaction.query.filter_by(user_id=user_id).first()
+            
+            if not transaction:
+                flash('No transaction history found for this user.', 'error')
+                return redirect(url_for('transaction_history_search'))
+                
+            return render_template('transaction_history.html', 
+                                user=user,
+                                transaction=transaction)
+        except Exception as e:
+            flash('Error loading transaction history.', 'error')
+            return redirect(url_for('transaction_history_search'))
+
     @app.route('/export-csv')
     def export_csv():
         try:

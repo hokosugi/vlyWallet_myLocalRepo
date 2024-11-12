@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Transaction History</h2>
+                <div class="user-info">
+                    <span class="badge bg-secondary">User ID: {{ user.id }}</span>
+                    <span class="badge bg-info ms-2">Total Points: {{ transaction.points }}</span>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Transaction Stats</h5>
+                            <ul class="list-unstyled">
+                                <li>Total Transactions: {{ transaction.count }}</li>
+                                <li>Total Amount: ${{ "%.2f"|format(transaction.amount) }}</li>
+                                <li>Weekly Streak: {{ transaction.weekly_streak }} weeks</li>
+                                <li>Transaction Frequency: {{ transaction.transaction_frequency }} per day</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Points Breakdown</h5>
+                            <ul class="list-unstyled">
+                                <li>Base Transaction Points: {{ transaction.count * 10 }}</li>
+                                <li>Amount Based Points: {{ (transaction.amount / 100)|int }}</li>
+                                <li>Large Transaction Bonus: {{ (transaction.amount / 1000)|int * 50 }}</li>
+                                <li>Frequency Bonus: {{ transaction.transaction_frequency * 5 }}</li>
+                                <li>Streak Bonus: {{ transaction.weekly_streak * 25 }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Transaction Details</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Last Updated: {{ transaction.last_updated.strftime('%Y-%m-%d %H:%M:%S UTC') }}</p>
+                    <p class="text-muted">Last Transaction: {% if transaction.last_transaction_date %}{{ transaction.last_transaction_date.strftime('%Y-%m-%d %H:%M:%S UTC') }}{% else %}No transactions yet{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
