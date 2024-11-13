@@ -35,3 +35,5 @@ instance/
 
 # Ignore workflow files for automated pushes
 .github/workflows/deploy.yml
+
+.github/workflows/ci.yml

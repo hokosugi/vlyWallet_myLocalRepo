@@ -72,6 +72,41 @@ def run_git_command(command, check=True):
         logger.error(f"Git command failed: {e.stderr}")
         return False, e.stderr.strip()
 
+def ensure_workflow_files_ignored():
+    """Ensure workflow files are properly ignored"""
+    try:
+        # Check if .gitignore exists and contains workflow entries
+        workflow_ignores = [
+            ".github/workflows/",
+            ".github/workflows/deploy.yml",
+            ".github/workflows/ci.yml"
+        ]
+        
+        if os.path.exists('.gitignore'):
+            with open('.gitignore', 'r') as f:
+                current_ignores = f.read()
+        else:
+            current_ignores = ""
+            
+        # Add missing workflow ignores
+        new_ignores = []
+        for ignore in workflow_ignores:
+            if ignore not in current_ignores:
+                new_ignores.append(ignore)
+                
+        if new_ignores:
+            with open('.gitignore', 'a') as f:
+                f.write('\n' + '\n'.join(new_ignores) + '\n')
+            
+        # Remove workflow files from git tracking
+        for workflow_file in workflow_ignores:
+            run_git_command(f"git rm -r --cached {workflow_file}", check=False)
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error updating .gitignore: {str(e)}")
+        return False
+
 def initialize_repository():
     """Initialize git repository if not already initialized"""
     try:
@@ -86,7 +121,10 @@ def initialize_repository():
             repo_url = "https://github.com/hokosugi/VlyWalletLeadersboard.git"
             _, output = run_git_command(f"git remote add origin {repo_url}")
             logger.info("Added remote origin")
-
+        
+        # Ensure workflow files are ignored
+        ensure_workflow_files_ignored()
+        
         return True
     except Exception as e:
         logger.error(f"Error initializing repository: {str(e)}")
@@ -97,11 +135,11 @@ def git_push(force=False):
     try:
         logger.info("Starting git push operation")
         
-        # Explicitly exclude workflow files
+        # Ensure workflow files are properly ignored
+        ensure_workflow_files_ignored()
+        
+        # Add all changes except ignored files
         run_git_command("git add --all")
-        run_git_command("git reset -- .github/workflows/")
-        run_git_command("git reset -- .github/workflows/deploy.yml")
-        run_git_command("git reset -- .github/workflows/ci.yml")
         
         # Create commit message
         commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
