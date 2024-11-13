@@ -1,5 +1,7 @@
-from flask import render_template, request, redirect, url_for, flash, send_file, jsonify
-from models import db, User, Transaction
+from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session
+from models import db, User, Transaction, Admin
+from flask_login import login_user, logout_user, login_required, current_user
+from flask_babel import gettext as _
 import csv
 from io import BytesIO, StringIO
 from datetime import datetime
@@ -14,26 +16,53 @@ def register_routes(app):
         if request.method == 'POST':
             user_id = request.form.get('user_id')
             if not user_id:
-                flash('Please enter a valid User ID', 'error')
+                flash(_('Please enter a valid User ID'), 'error')
                 return redirect(url_for('register'))
             
             existing_user = User.query.filter_by(id=user_id).first()
             if existing_user:
-                flash('User ID already registered', 'error')
+                flash(_('User ID already registered'), 'error')
                 return redirect(url_for('register'))
             
             new_user = User(id=user_id)
             db.session.add(new_user)
             try:
                 db.session.commit()
-                flash('Registration successful!', 'success')
+                flash(_('Registration successful!'), 'success')
                 return redirect(url_for('leaderboard'))
             except Exception as e:
                 db.session.rollback()
-                flash('Error registering user. Please try again.', 'error')
+                flash(_('Error registering user. Please try again.'), 'error')
                 return redirect(url_for('register'))
         
         return render_template('register.html')
+
+    @app.route('/admin/login', methods=['GET', 'POST'])
+    def admin_login():
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            admin = Admin.query.filter_by(username=username).first()
+            
+            if admin and admin.check_password(password):
+                login_user(admin)
+                flash(_('Login successful!'), 'success')
+                return redirect(url_for('leaderboard'))
+            
+            flash(_('Invalid username or password'), 'error')
+        return render_template('admin_login.html')
+
+    @app.route('/admin/logout')
+    @login_required
+    def admin_logout():
+        logout_user()
+        flash(_('Logged out successfully'), 'success')
+        return redirect(url_for('index'))
+
+    @app.route('/set-language/<lang>')
+    def set_language(lang):
+        session['lang'] = lang
+        return redirect(request.referrer or url_for('index'))
 
     @app.route('/leaderboard')
     def leaderboard():
@@ -52,7 +81,7 @@ def register_routes(app):
                                 transactions_count=count_data,
                                 transactions_amount=amount_data)
         except Exception as e:
-            flash('Error loading leaderboard data.', 'error')
+            flash(_('Error loading leaderboard data.'), 'error')
             return redirect(url_for('index'))
 
     @app.route('/transaction-history', methods=['GET', 'POST'])
@@ -60,7 +89,7 @@ def register_routes(app):
         if request.method == 'POST':
             user_id = request.form.get('user_id')
             if not user_id:
-                flash('Please enter a valid User ID', 'error')
+                flash(_('Please enter a valid User ID'), 'error')
                 return redirect(url_for('transaction_history_search'))
             return redirect(url_for('transaction_history', user_id=user_id))
         return render_template('transaction_history_search.html')
@@ -72,24 +101,25 @@ def register_routes(app):
             transaction = Transaction.query.filter_by(user_id=user_id).first()
             
             if not transaction:
-                flash('No transaction history found for this user.', 'error')
+                flash(_('No transaction history found for this user.'), 'error')
                 return redirect(url_for('transaction_history_search'))
                 
             return render_template('transaction_history.html', 
                                 user=user,
                                 transaction=transaction)
         except Exception as e:
-            flash('Error loading transaction history.', 'error')
+            flash(_('Error loading transaction history.'), 'error')
             return redirect(url_for('transaction_history_search'))
 
     @app.route('/export-csv')
+    @login_required
     def export_csv():
         try:
             output = BytesIO()
             string_buffer = StringIO()
             writer = csv.writer(string_buffer)
             
-            writer.writerow(['User ID', 'Transaction Count', 'Total Amount', 'Points', 'Last Updated'])
+            writer.writerow([_('User ID'), _('Transaction Count'), _('Total Amount'), _('Points'), _('Last Updated')])
             
             transactions = Transaction.query.all()
             for t in transactions:
@@ -106,5 +136,5 @@ def register_routes(app):
                 download_name=f'leaderboard_{datetime.now().strftime("%Y%m%d")}.csv'
             )
         except Exception as e:
-            flash('Error exporting data.', 'error')
+            flash(_('Error exporting data.'), 'error')
             return redirect(url_for('leaderboard'))

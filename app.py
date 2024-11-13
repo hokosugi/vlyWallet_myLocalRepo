@@ -1,8 +1,10 @@
 import os
-from flask import Flask
+from flask import Flask, request, session
 from database import db
 import logging
 from sqlalchemy.exc import SQLAlchemyError
+from flask_babel import Babel
+from flask_login import LoginManager
 
 # Configure logging
 logging.basicConfig(
@@ -11,12 +13,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+login_manager = LoginManager()
+
+def get_locale():
+    return session.get('lang', 'en')
+
 def create_app():
     flask_app = Flask(__name__)
     
     # Configure Flask app
     flask_app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
     flask_app.debug = True
+    
+    # Initialize Babel
+    babel = Babel(flask_app, locale_selector=get_locale)
+    
+    # Initialize Login Manager
+    login_manager.init_app(flask_app)
+    login_manager.login_view = 'admin_login'
     
     # Database configuration with error handling
     try:
@@ -43,10 +57,14 @@ def create_app():
         
         with flask_app.app_context():
             # Import models and views after app initialization
-            from models import User, Transaction
+            from models import User, Transaction, Admin
             from views import register_routes
             from vly_api import update_transactions
             from scheduler import start_scheduler
+            
+            @login_manager.user_loader
+            def load_user(user_id):
+                return Admin.query.get(int(user_id))
             
             try:
                 # Test database connection
@@ -56,6 +74,14 @@ def create_app():
                 # Create database tables
                 db.create_all()
                 logger.info("Database tables created successfully")
+                
+                # Create default admin if not exists
+                if not Admin.query.filter_by(username='admin').first():
+                    admin = Admin(username='admin')
+                    admin.set_password('admin123')  # Default password
+                    db.session.add(admin)
+                    db.session.commit()
+                    logger.info("Default admin user created")
                 
                 # Start scheduler for weekly updates
                 start_scheduler(update_transactions)

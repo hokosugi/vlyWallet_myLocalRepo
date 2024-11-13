@@ -1,0 +1,70 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "Welcome to Vly.money Leaderboard"
+msgstr "Vly.money リーダーボードへようこそ"
+
+msgid "Track your transaction metrics and compete with other users!"
+msgstr "取引実績を追跡し、他のユーザーと競い合おう！"
+
+msgid "Register"
+msgstr "登録"
+
+msgid "View Leaderboard"
+msgstr "リーダーボードを見る"
+
+msgid "Points"
+msgstr "ポイント"
+
+msgid "Transaction Count"
+msgstr "取引回数"
+
+msgid "Transaction Amount"
+msgstr "取引額"
+
+msgid "Rank"
+msgstr "順位"
+
+msgid "User ID"
+msgstr "ユーザーID"
+
+msgid "Amount"
+msgstr "金額"
+
+msgid "Top Points"
+msgstr "トップポイント"
+
+msgid "Top Transaction Counts"
+msgstr "トップ取引回数"
+
+msgid "Top Transaction Amounts"
+msgstr "トップ取引額"
+
+msgid "Export CSV"
+msgstr "CSVをエクスポート"
+
+msgid "Admin Login"
+msgstr "管理者ログイン"
+
+msgid "Username"
+msgstr "ユーザー名"
+
+msgid "Password"
+msgstr "パスワード"
+
+msgid "Login"
+msgstr "ログイン"
+
+msgid "Logout"
+msgstr "ログアウト"
+
+msgid "Language"
+msgstr "言語"
+
+msgid "English"
+msgstr "英語"
+
+msgid "Japanese"
+msgstr "日本語"
