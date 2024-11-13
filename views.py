@@ -5,8 +5,11 @@ from flask_babel import gettext as _
 import csv
 from io import BytesIO, StringIO
 from datetime import datetime
+from flask_wtf.csrf import CSRFProtect
 
 def register_routes(app):
+    csrf = CSRFProtect(app)
+
     @app.route('/')
     def index():
         return render_template('index.html')
@@ -59,6 +62,58 @@ def register_routes(app):
         flash(_('Logged out successfully'), 'success')
         return redirect(url_for('index'))
 
+    @app.route('/admin/profile')
+    @login_required
+    def admin_profile():
+        return render_template('admin_profile.html')
+
+    @app.route('/admin/profile/update-username', methods=['POST'])
+    @login_required
+    def admin_update_username():
+        new_username = request.form.get('new_username')
+        if not new_username:
+            flash(_('Username cannot be empty'), 'error')
+            return redirect(url_for('admin_profile'))
+        
+        try:
+            current_user.update_username(new_username)
+            db.session.commit()
+            flash(_('Username updated successfully'), 'success')
+        except ValueError as e:
+            flash(_(str(e)), 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(_('Error updating username'), 'error')
+        
+        return redirect(url_for('admin_profile'))
+
+    @app.route('/admin/profile/update-password', methods=['POST'])
+    @login_required
+    def admin_update_password():
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not current_user.check_password(current_password):
+            flash(_('Current password is incorrect'), 'error')
+            return redirect(url_for('admin_profile'))
+        
+        if new_password != confirm_password:
+            flash(_('New passwords do not match'), 'error')
+            return redirect(url_for('admin_profile'))
+            
+        try:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash(_('Password updated successfully'), 'success')
+        except ValueError as e:
+            flash(_(str(e)), 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(_('Error updating password'), 'error')
+        
+        return redirect(url_for('admin_profile'))
+
     @app.route('/set-language/<lang>')
     def set_language(lang):
         session['lang'] = lang
@@ -72,15 +127,14 @@ def register_routes(app):
             transactions_count = Transaction.query.order_by(Transaction.count.desc()).limit(10).all()
             transactions_amount = Transaction.query.order_by(Transaction.amount.desc()).limit(10).all()
 
-            # Convert SQLAlchemy objects to dictionaries for JSON serialization
             points_data = [{'user_id': t.user_id, 'points': t.points} for t in transactions_points]
             count_data = [{'user_id': t.user_id, 'count': t.count} for t in transactions_count]
             amount_data = [{'user_id': t.user_id, 'amount': t.amount} for t in transactions_amount]
 
             return render_template('leaderboard.html', 
-                                transactions_points=points_data,
-                                transactions_count=count_data,
-                                transactions_amount=amount_data)
+                               transactions_points=points_data,
+                               transactions_count=count_data,
+                               transactions_amount=amount_data)
         except Exception as e:
             flash(_('Error loading leaderboard data.'), 'error')
             return redirect(url_for('index'))
@@ -106,8 +160,8 @@ def register_routes(app):
                 return redirect(url_for('transaction_history_search'))
                 
             return render_template('transaction_history.html', 
-                                user=user,
-                                transaction=transaction)
+                               user=user,
+                               transaction=transaction)
         except Exception as e:
             flash(_('Error loading transaction history.'), 'error')
             return redirect(url_for('transaction_history_search'))

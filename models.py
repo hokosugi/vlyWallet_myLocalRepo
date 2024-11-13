@@ -14,10 +14,28 @@ class Admin(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     
     def set_password(self, password):
+        if not self.validate_password(password):
+            raise ValueError("Password must be at least 8 characters long and contain at least one number")
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def update_username(self, new_username):
+        if not self.validate_username(new_username):
+            raise ValueError("Username must be between 3 and 80 characters long")
+        if Admin.query.filter(Admin.username == new_username, Admin.id != self.id).first():
+            raise ValueError("Username already exists")
+        self.username = new_username
+        
+    @staticmethod
+    def validate_password(password):
+        return (len(password) >= 8 and 
+                any(c.isdigit() for c in password))
+    
+    @staticmethod
+    def validate_username(username):
+        return 3 <= len(username) <= 80
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)

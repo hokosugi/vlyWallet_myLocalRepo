@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">{{ _('Profile Settings') }}</h2>
+                
+                <form method="POST" action="{{ url_for('admin_update_username') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="new_username" class="form-label">{{ _('New Username') }}</label>
+                        <input type="text" class="form-control" id="new_username" name="new_username" required 
+                               minlength="3" maxlength="80" value="{{ current_user.username }}">
+                        <div class="form-text">{{ _('Username must be between 3 and 80 characters') }}</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">{{ _('Change Username') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">{{ _('Change Password') }}</h3>
+                <form method="POST" action="{{ url_for('admin_update_password') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">{{ _('Current Password') }}</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">{{ _('New Password') }}</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8">
+                        <div class="form-text">{{ _('Password must be at least 8 characters and contain at least one number') }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">{{ _('Confirm New Password') }}</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">{{ _('Change Password') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

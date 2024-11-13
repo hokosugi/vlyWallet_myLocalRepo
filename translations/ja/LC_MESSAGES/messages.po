@@ -371,3 +371,54 @@ msgstr "取引履歴の読み込みでエラーが発生しました。"
 
 msgid "Error exporting data."
 msgstr "データのエクスポートでエラーが発生しました。"
+
+msgid "Profile Settings"
+msgstr "プロフィール設定"
+
+msgid "New Username"
+msgstr "新しいユーザー名"
+
+msgid "Username must be between 3 and 80 characters"
+msgstr "ユーザー名は3文字から80文字の間で設定してください"
+
+msgid "Change Username"
+msgstr "ユーザー名を変更"
+
+msgid "Change Password"
+msgstr "パスワードを変更"
+
+msgid "Current Password"
+msgstr "現在のパスワード"
+
+msgid "New Password"
+msgstr "新しいパスワード"
+
+msgid "Password must be at least 8 characters and contain at least one number"
+msgstr "パスワードは8文字以上で、少なくとも1つの数字を含める必要があります"
+
+msgid "Confirm New Password"
+msgstr "新しいパスワードの確認"
+
+msgid "Username cannot be empty"
+msgstr "ユーザー名を入力してください"
+
+msgid "Username updated successfully"
+msgstr "ユーザー名が更新されました"
+
+msgid "Error updating username"
+msgstr "ユーザー名の更新中にエラーが発生しました"
+
+msgid "Current password is incorrect"
+msgstr "現在のパスワードが正しくありません"
+
+msgid "New passwords do not match"
+msgstr "新しいパスワードが一致しません"
+
+msgid "Password updated successfully"
+msgstr "パスワードが更新されました"
+
+msgid "Error updating password"
+msgstr "パスワードの更新中にエラーが発生しました"
+
+msgid "Username already exists"
+msgstr "このユーザー名は既に使用されています"
