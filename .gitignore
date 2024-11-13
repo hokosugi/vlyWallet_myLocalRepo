@@ -31,3 +31,7 @@ instance/
 .webassets-cache
 .env.local
 .env.*.local
+.github/workflows/
+
+# Ignore workflow files for automated pushes
+.github/workflows/deploy.yml
