@@ -20,9 +20,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('register') }}">{{ _('Register') }}</a>
                     </li>
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('leaderboard') }}">{{ _('View Leaderboard') }}</a>
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">{{ _('Admin Leaderboard') }}</a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('transaction_history_search') }}">{{ _('Transaction History') }}</a>
                     </li>

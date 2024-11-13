@@ -65,6 +65,7 @@ def register_routes(app):
         return redirect(request.referrer or url_for('index'))
 
     @app.route('/leaderboard')
+    @login_required
     def leaderboard():
         try:
             transactions_points = Transaction.query.order_by(Transaction.points.desc()).limit(10).all()
