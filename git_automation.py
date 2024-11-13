@@ -18,21 +18,35 @@ def disable_branch_protection():
     try:
         github_token = os.environ.get('GITHUB_TOKEN')
         if not github_token:
+            logger.error("GitHub token not found")
             return False
             
         url = "https://api.github.com/repos/hokosugi/VlyWalletLeadersboard/branches/main/protection"
         headers = {
-            "Authorization": f"token {github_token}",
-            "Accept": "application/vnd.github.v3+json"
+            "Authorization": f"Bearer {github_token}",
+            "Accept": "application/vnd.github.v3+json",
+            "X-GitHub-Api-Version": "2022-11-28"
         }
         
+        # First, try to get current protection status
+        get_response = requests.get(url, headers=headers)
+        if get_response.status_code == 404:
+            logger.info("No branch protection rules found")
+            return True
+            
+        if get_response.status_code == 403:
+            logger.error("Permission denied. Token needs 'repo/admin' scope")
+            return False
+        
+        # If protection exists, try to delete it
         response = requests.delete(url, headers=headers)
         if response.status_code in [200, 204]:
             logger.info("Branch protection temporarily disabled")
             return True
         else:
-            logger.error(f"Failed to disable branch protection: {response.status_code}")
+            logger.error(f"Failed to disable branch protection: {response.status_code} - {response.text}")
             return False
+            
     except Exception as e:
         logger.error(f"Error disabling branch protection: {str(e)}")
         return False
@@ -52,6 +66,7 @@ def setup_git_config():
                 new_url = f"https://x-access-token:{github_token}@github.com/{remote_url.split('github.com/')[1]}"
                 subprocess.run(['git', 'remote', 'set-url', 'origin', new_url], check=True)
             logger.info("Git configuration set up successfully")
+            
         return True
     except Exception as e:
         logger.error(f"Error setting up git config: {str(e)}")
@@ -84,9 +99,9 @@ def ensure_workflow_files_ignored():
         
         if os.path.exists('.gitignore'):
             with open('.gitignore', 'r') as f:
-                current_ignores = f.read()
+                current_ignores = f.read().splitlines()
         else:
-            current_ignores = ""
+            current_ignores = []
             
         # Add missing workflow ignores
         new_ignores = []
@@ -149,17 +164,16 @@ def git_push(force=False):
         if "nothing to commit" not in output:
             logger.info("Changes committed successfully")
         
-        # Temporarily disable branch protection
-        if force and not disable_branch_protection():
-            logger.error("Failed to disable branch protection")
-            return False, "Failed to disable branch protection"
+        # Temporarily disable branch protection if force pushing
+        if force:
+            if not disable_branch_protection():
+                logger.error("Failed to disable branch protection")
+                return False, "Failed to disable branch protection"
+            logger.info("Branch protection disabled successfully")
         
-        # Force push to remote
+        # Push changes to remote
         push_command = "git push -u origin main --force" if force else "git push -u origin main"
         success, output = run_git_command(push_command)
-        
-        # Wait a bit before re-enabling protection
-        time.sleep(2)
         
         if success:
             logger.info("Git push completed successfully")
