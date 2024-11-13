@@ -11,6 +11,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def setup_git_config():
+    """Setup basic git configuration"""
+    try:
+        # Set git configurations
+        subprocess.run(['git', 'config', '--global', 'user.name', 'GitHub Actions Bot'], check=True)
+        subprocess.run(['git', 'config', '--global', 'user.email', 'actions@github.com'], check=True)
+        
+        # Setup GitHub token for authentication
+        github_token = os.environ.get('GITHUB_TOKEN')
+        if github_token:
+            remote_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode().strip()
+            if 'https://' in remote_url:
+                new_url = f"https://x-access-token:{github_token}@github.com/{remote_url.split('github.com/')[1]}"
+                subprocess.run(['git', 'remote', 'set-url', 'origin', new_url], check=True)
+        return True
+    except Exception as e:
+        logger.error(f"Error setting up git config: {str(e)}")
+        return False
+
 def run_git_command(command):
     """Execute a git command and return the output"""
     try:
@@ -69,6 +88,10 @@ def git_push(commit_message=None):
 
 def sync_repository():
     """Synchronize repository by pulling and pushing changes"""
+    # Setup git configuration first
+    if not setup_git_config():
+        return False, "Failed to setup git configuration"
+    
     pull_success, pull_message = git_pull()
     if not pull_success:
         return False, f"Pull failed: {pull_message}"
