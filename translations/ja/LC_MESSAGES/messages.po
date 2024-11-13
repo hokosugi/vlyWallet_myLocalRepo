@@ -68,3 +68,120 @@ msgstr "英語"
 
 msgid "Japanese"
 msgstr "日本語"
+
+msgid "Register Your Vly.money ID"
+msgstr "Vly.money IDを登録"
+
+msgid "Vly.money User ID"
+msgstr "Vly.money ユーザーID"
+
+msgid "Transaction History"
+msgstr "取引履歴"
+
+msgid "Total Points"
+msgstr "合計ポイント"
+
+msgid "Points Breakdown"
+msgstr "ポイント内訳"
+
+msgid "Transaction Statistics"
+msgstr "取引統計"
+
+msgid "Transaction Stats"
+msgstr "取引状況"
+
+msgid "Points Details"
+msgstr "ポイント詳細"
+
+msgid "Transaction Details"
+msgstr "取引詳細"
+
+msgid "Total Transactions"
+msgstr "総取引数"
+
+msgid "Total Amount"
+msgstr "総取引額"
+
+msgid "Weekly Streak"
+msgstr "週連続"
+
+msgid "weeks"
+msgstr "週"
+
+msgid "Transaction Frequency"
+msgstr "取引頻度"
+
+msgid "per day"
+msgstr "回/日"
+
+msgid "Base Transaction Points"
+msgstr "基本取引ポイント"
+
+msgid "Amount Based Points"
+msgstr "取引額ベースポイント"
+
+msgid "Large Transaction Bonus"
+msgstr "大口取引ボーナス"
+
+msgid "Frequency Bonus"
+msgstr "頻度ボーナス"
+
+msgid "Streak Bonus"
+msgstr "連続ボーナス"
+
+msgid "Last Updated"
+msgstr "最終更新"
+
+msgid "Last Transaction"
+msgstr "最終取引"
+
+msgid "No transactions yet"
+msgstr "取引履歴なし"
+
+msgid "Points Distribution"
+msgstr "ポイント分布"
+
+msgid "Transaction Counts"
+msgstr "取引回数"
+
+msgid "Transaction Amounts"
+msgstr "取引金額"
+
+msgid "Base Points"
+msgstr "基本ポイント"
+
+msgid "Amount Points"
+msgstr "金額ポイント"
+
+msgid "Please enter a valid User ID"
+msgstr "有効なユーザーIDを入力してください"
+
+msgid "User ID already registered"
+msgstr "このユーザーIDは既に登録されています"
+
+msgid "Registration successful!"
+msgstr "登録が完了しました！"
+
+msgid "Error registering user. Please try again."
+msgstr "ユーザー登録でエラーが発生しました。もう一度お試しください。"
+
+msgid "Login successful!"
+msgstr "ログインしました！"
+
+msgid "Invalid username or password"
+msgstr "ユーザー名またはパスワードが無効です"
+
+msgid "Logged out successfully"
+msgstr "ログアウトしました"
+
+msgid "Error loading leaderboard data."
+msgstr "リーダーボードデータの読み込みでエラーが発生しました。"
+
+msgid "No transaction history found for this user."
+msgstr "このユーザーの取引履歴が見つかりません。"
+
+msgid "Error loading transaction history."
+msgstr "取引履歴の読み込みでエラーが発生しました。"
+
+msgid "Error exporting data."
+msgstr "データのエクスポートでエラーが発生しました。"

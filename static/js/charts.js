@@ -6,7 +6,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
         data: {
             labels: pointsData.map(d => d.user_id),
             datasets: [{
-                label: 'Points',
+                label: gettext('Points'),
                 data: pointsData.map(d => d.points),
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -18,7 +18,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Points Distribution'
+                    text: gettext('Points Distribution')
                 }
             },
             scales: {
@@ -35,7 +35,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
         data: {
             labels: countData.map(d => d.user_id),
             datasets: [{
-                label: 'Transaction Count',
+                label: gettext('Transaction Count'),
                 data: countData.map(d => d.count),
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -47,7 +47,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Transaction Counts'
+                    text: gettext('Transaction Counts')
                 }
             },
             scales: {
@@ -64,7 +64,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
         data: {
             labels: amountData.map(d => d.user_id),
             datasets: [{
-                label: 'Transaction Amount ($)',
+                label: gettext('Transaction Amount ($)'),
                 data: amountData.map(d => d.amount),
                 backgroundColor: 'rgba(255, 159, 64, 0.6)',
                 borderColor: 'rgba(255, 159, 64, 1)',
@@ -76,7 +76,7 @@ function createLeaderboardCharts(pointsData, countData, amountData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Transaction Amounts'
+                    text: gettext('Transaction Amounts')
                 }
             },
             scales: {
@@ -95,11 +95,11 @@ function createTransactionHistoryCharts(transactionData) {
         type: 'pie',
         data: {
             labels: [
-                'Base Transaction Points',
-                'Amount Based Points',
-                'Large Transaction Bonus',
-                'Frequency Bonus',
-                'Streak Bonus'
+                gettext('Base Points'),
+                gettext('Amount Points'),
+                gettext('Large Transaction Bonus'),
+                gettext('Frequency Bonus'),
+                gettext('Streak Bonus')
             ],
             datasets: [{
                 data: [
@@ -123,7 +123,7 @@ function createTransactionHistoryCharts(transactionData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Points Breakdown'
+                    text: gettext('Points Breakdown')
                 }
             }
         }
@@ -133,9 +133,13 @@ function createTransactionHistoryCharts(transactionData) {
     new Chart(document.getElementById('statsChart'), {
         type: 'bar',
         data: {
-            labels: ['Total Transactions', 'Weekly Streak', 'Daily Frequency'],
+            labels: [
+                gettext('Total Transactions'),
+                gettext('Weekly Streak'),
+                gettext('Daily Frequency')
+            ],
             datasets: [{
-                label: 'Transaction Statistics',
+                label: gettext('Transaction Statistics'),
                 data: [
                     transactionData.count,
                     transactionData.weekly_streak,
@@ -159,7 +163,7 @@ function createTransactionHistoryCharts(transactionData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Transaction Statistics'
+                    text: gettext('Transaction Statistics')
                 }
             },
             scales: {
@@ -169,4 +173,29 @@ function createTransactionHistoryCharts(transactionData) {
             }
         }
     });
+}
+
+// Add gettext function for translations
+function gettext(text) {
+    // This function would normally be provided by a JavaScript i18n library
+    // For now, we'll use a simple object to store translations
+    const translations = {
+        'Points': 'ポイント',
+        'Points Distribution': 'ポイント分布',
+        'Transaction Count': '取引回数',
+        'Transaction Counts': '取引回数',
+        'Transaction Amount ($)': '取引額 ($)',
+        'Transaction Amounts': '取引金額',
+        'Base Points': '基本ポイント',
+        'Amount Points': '金額ポイント',
+        'Large Transaction Bonus': '大口取引ボーナス',
+        'Frequency Bonus': '頻度ボーナス',
+        'Streak Bonus': '連続ボーナス',
+        'Points Breakdown': 'ポイント内訳',
+        'Total Transactions': '総取引数',
+        'Weekly Streak': '週連続',
+        'Daily Frequency': '1日あたりの頻度',
+        'Transaction Statistics': '取引統計'
+    };
+    return translations[text] || text;
 }
