@@ -75,13 +75,17 @@ def create_app():
                 db.create_all()
                 logger.info("Database tables created successfully")
                 
-                # Create default admin if not exists
-                if not Admin.query.filter_by(username='admin').first():
-                    admin = Admin(username='admin')
-                    admin.set_password('admin123')  # Default password
-                    db.session.add(admin)
-                    db.session.commit()
-                    logger.info("Default admin user created")
+                # Remove existing admin if exists
+                Admin.query.filter_by(username='admin').delete()
+                db.session.commit()
+                logger.info("Existing admin user removed")
+
+                # Create new admin user
+                admin = Admin(username='admin')
+                admin.set_password('admin123')
+                db.session.add(admin)
+                db.session.commit()
+                logger.info("Default admin user created/reset")
                 
                 # Start scheduler for weekly updates
                 start_scheduler(update_transactions)
