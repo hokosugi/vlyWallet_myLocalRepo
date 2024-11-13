@@ -3,6 +3,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: ja\n"
 
+msgid "View Transaction History"
+msgstr "取引履歴を表示"
+
+msgid "Enter Your Vly.money User ID"
+msgstr "Vly.money ユーザーIDを入力"
+
+msgid "View History"
+msgstr "履歴を表示"
+
 msgid "Welcome to Vly.money Leaderboard"
 msgstr "Vly.money リーダーボードへようこそ"
 
