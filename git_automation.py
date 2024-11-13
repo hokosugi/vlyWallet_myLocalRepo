@@ -30,28 +30,64 @@ def setup_git_config():
         logger.error(f"Error setting up git config: {str(e)}")
         return False
 
-def run_git_command(command):
+def run_git_command(command, check=True):
     """Execute a git command and return the output"""
     try:
         result = subprocess.run(
             command,
             shell=True,
-            check=True,
+            check=check,
             capture_output=True,
             text=True
         )
-        return result.stdout.strip()
+        return True, result.stdout.strip()
     except subprocess.CalledProcessError as e:
         logger.error(f"Git command failed: {e.stderr}")
-        raise
+        return False, e.stderr.strip()
+
+def initialize_repository():
+    """Initialize git repository if not already initialized"""
+    try:
+        # Check if git is initialized
+        if not os.path.exists('.git'):
+            _, output = run_git_command("git init")
+            logger.info("Git repository initialized")
+            
+        # Check remote and add if not exists
+        success, output = run_git_command("git remote -v", check=False)
+        if 'origin' not in output:
+            repo_url = "https://github.com/hokosugi/VlyWalletLeadersboard.git"
+            _, output = run_git_command(f"git remote add origin {repo_url}")
+            logger.info("Added remote origin")
+
+        # Create and checkout main branch if it doesn't exist
+        _, output = run_git_command("git rev-parse --verify main", check=False)
+        if not output:
+            _, output = run_git_command("git checkout -b main")
+            logger.info("Created and checked out main branch")
+        else:
+            _, output = run_git_command("git checkout main")
+            logger.info("Checked out existing main branch")
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error initializing repository: {str(e)}")
+        return False
 
 def git_pull():
     """Pull latest changes from the remote repository"""
     try:
         logger.info("Starting git pull operation")
-        output = run_git_command("git pull origin main")
-        logger.info(f"Git pull completed: {output}")
-        return True, output
+        success, output = run_git_command("git pull origin main --allow-unrelated-histories", check=False)
+        if not success and "couldn't find remote ref main" in output:
+            logger.info("Remote branch doesn't exist yet, skipping pull")
+            return True, "No remote branch yet"
+        elif success:
+            logger.info(f"Git pull completed: {output}")
+            return True, output
+        else:
+            logger.error(f"Git pull failed: {output}")
+            return False, output
     except Exception as e:
         logger.error(f"Error during git pull: {str(e)}")
         return False, str(e)
@@ -62,23 +98,29 @@ def git_push(commit_message=None):
         logger.info("Starting git push operation")
         
         # Check for changes
-        status = run_git_command("git status --porcelain")
+        success, status = run_git_command("git status --porcelain")
         if not status:
             logger.info("No changes to commit")
             return True, "No changes to commit"
 
         # Add all changes
-        run_git_command("git add .")
+        success, _ = run_git_command("git add .")
+        if not success:
+            return False, "Failed to stage changes"
         
         # Create commit message if not provided
         if not commit_message:
             commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         
         # Commit changes
-        run_git_command(f'git commit -m "{commit_message}"')
+        success, output = run_git_command(f'git commit -m "{commit_message}"')
+        if not success:
+            return False, f"Failed to commit: {output}"
         
         # Push changes
-        output = run_git_command("git push origin main")
+        success, output = run_git_command("git push -u origin main")
+        if not success:
+            return False, f"Failed to push: {output}"
         
         logger.info(f"Git push completed: {output}")
         return True, output
@@ -92,10 +134,16 @@ def sync_repository():
     if not setup_git_config():
         return False, "Failed to setup git configuration"
     
+    # Initialize repository if needed
+    if not initialize_repository():
+        return False, "Failed to initialize repository"
+    
+    # Pull changes
     pull_success, pull_message = git_pull()
-    if not pull_success:
+    if not pull_success and "No remote branch yet" not in pull_message:
         return False, f"Pull failed: {pull_message}"
     
+    # Push changes
     push_success, push_message = git_push()
     if not push_success:
         return False, f"Push failed: {push_message}"
@@ -104,4 +152,9 @@ def sync_repository():
 
 if __name__ == "__main__":
     success, message = sync_repository()
-    print(f"{'Success' if success else 'Failed'}: {message}")
+    if success:
+        logger.info(message)
+        print(f"Success: {message}")
+    else:
+        logger.error(message)
+        print(f"Failed: {message}")
