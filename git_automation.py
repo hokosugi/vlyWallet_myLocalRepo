@@ -92,14 +92,14 @@ def git_pull():
         logger.error(f"Error during git pull: {str(e)}")
         return False, str(e)
 
-def git_push(commit_message=None):
+def git_push(force=False):
     """Push changes to the remote repository"""
     try:
         logger.info("Starting git push operation")
         
         # Check for changes
         success, status = run_git_command("git status --porcelain")
-        if not status:
+        if not status and not force:
             logger.info("No changes to commit")
             return True, "No changes to commit"
 
@@ -111,17 +111,17 @@ def git_push(commit_message=None):
         if not success:
             return False, "Failed to stage changes"
         
-        # Create commit message if not provided
-        if not commit_message:
-            commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        # Create commit message
+        commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         
         # Commit changes
         success, output = run_git_command(f'git commit -m "{commit_message}"')
         if not success and "nothing to commit" not in output:
             return False, f"Failed to commit: {output}"
         
-        # Push changes
-        success, output = run_git_command("git push -u origin main")
+        # Push changes with force if requested
+        push_command = "git push -u origin main --force" if force else "git push -u origin main"
+        success, output = run_git_command(push_command)
         if not success:
             if "workflow" in output:
                 logger.warning("Skipping workflow files due to permission restrictions")
@@ -134,7 +134,7 @@ def git_push(commit_message=None):
         logger.error(f"Error during git push: {str(e)}")
         return False, str(e)
 
-def sync_repository():
+def sync_repository(force_push=False):
     """Synchronize repository by pulling and pushing changes"""
     # Setup git configuration first
     if not setup_git_config():
@@ -144,20 +144,22 @@ def sync_repository():
     if not initialize_repository():
         return False, "Failed to initialize repository"
     
-    # Pull changes
-    pull_success, pull_message = git_pull()
-    if not pull_success and "No remote branch yet" not in pull_message:
-        return False, f"Pull failed: {pull_message}"
+    # Pull changes (skip if force pushing)
+    if not force_push:
+        pull_success, pull_message = git_pull()
+        if not pull_success and "No remote branch yet" not in pull_message:
+            return False, f"Pull failed: {pull_message}"
     
     # Push changes
-    push_success, push_message = git_push()
+    push_success, push_message = git_push(force=force_push)
     if not push_success:
         return False, f"Push failed: {push_message}"
     
     return True, "Repository synchronized successfully"
 
 if __name__ == "__main__":
-    success, message = sync_repository()
+    # Execute force push
+    success, message = sync_repository(force_push=True)
     if success:
         logger.info(message)
         print(f"Success: {message}")
