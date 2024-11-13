@@ -24,3 +24,10 @@ var/
 .uv
 uv.lock
 .DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
+instance/
+.webassets-cache
+.env.local
+.env.*.local
