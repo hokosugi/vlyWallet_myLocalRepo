@@ -1,0 +1,18 @@
+# These owners will be the default owners for everything in
+# the repo. They will be requested for review when someone 
+# opens a pull request.
+*       @hokosugi
+
+# Python application files
+*.py    @hokosugi
+
+# Workflow files
+.github/workflows/*    @hokosugi
+
+# Database related files
+models.py    @hokosugi
+database.py    @hokosugi
+
+# Frontend templates
+templates/*    @hokosugi
+static/*    @hokosugi
