@@ -80,12 +80,18 @@ def create_app():
                 db.session.commit()
                 logger.info("Existing admin user removed")
 
-                # Create new admin user
+                # Get admin password from environment variable
+                admin_password = os.environ.get('ADMIN_PASSWORD')
+                if not admin_password:
+                    logger.error("ADMIN_PASSWORD environment variable not set!")
+                    raise ValueError("ADMIN_PASSWORD must be set")
+
+                # Create new admin user with environment variable password
                 admin = Admin(username='admin')
-                admin.set_password('admin123')
+                admin.set_password(admin_password)
                 db.session.add(admin)
                 db.session.commit()
-                logger.info("Default admin user created/reset")
+                logger.info("Default admin user created/reset with environment password")
                 
                 # Start scheduler for weekly updates
                 start_scheduler(update_transactions)

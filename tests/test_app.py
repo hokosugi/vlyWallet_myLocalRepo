@@ -1,10 +1,14 @@
 import unittest
+import os
 from app import create_app
 from database import db
 from models import Admin
 
 class TestApp(unittest.TestCase):
     def setUp(self):
+        # Set test environment variables
+        os.environ['ADMIN_PASSWORD'] = 'test_password123'
+        
         self.app = create_app()
         self.app.config['TESTING'] = True
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
@@ -13,7 +17,7 @@ class TestApp(unittest.TestCase):
         with self.app.app_context():
             db.create_all()
             admin = Admin(username='testadmin')
-            admin.set_password('admin123')
+            admin.set_password('test_password123')
             db.session.add(admin)
             db.session.commit()
 
@@ -29,6 +33,6 @@ class TestApp(unittest.TestCase):
     def test_admin_login(self):
         response = self.client.post('/admin/login', data={
             'username': 'testadmin',
-            'password': 'admin123'
+            'password': 'test_password123'
         })
         self.assertEqual(response.status_code, 302)  # Redirect after successful login
