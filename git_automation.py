@@ -25,6 +25,7 @@ def setup_git_config():
             if 'https://' in remote_url:
                 new_url = f"https://x-access-token:{github_token}@github.com/{remote_url.split('github.com/')[1]}"
                 subprocess.run(['git', 'remote', 'set-url', 'origin', new_url], check=True)
+            logger.info("Git configuration set up successfully")
         return True
     except Exception as e:
         logger.error(f"Error setting up git config: {str(e)}")
@@ -60,82 +61,45 @@ def initialize_repository():
             _, output = run_git_command(f"git remote add origin {repo_url}")
             logger.info("Added remote origin")
 
-        # Create and checkout main branch if it doesn't exist
-        _, output = run_git_command("git rev-parse --verify main", check=False)
-        if not output:
-            _, output = run_git_command("git checkout -b main")
-            logger.info("Created and checked out main branch")
-        else:
-            _, output = run_git_command("git checkout main")
-            logger.info("Checked out existing main branch")
-            
         return True
     except Exception as e:
         logger.error(f"Error initializing repository: {str(e)}")
         return False
-
-def git_pull():
-    """Pull latest changes from the remote repository"""
-    try:
-        logger.info("Starting git pull operation")
-        success, output = run_git_command("git pull origin main --allow-unrelated-histories", check=False)
-        if not success and "couldn't find remote ref main" in output:
-            logger.info("Remote branch doesn't exist yet, skipping pull")
-            return True, "No remote branch yet"
-        elif success:
-            logger.info(f"Git pull completed: {output}")
-            return True, output
-        else:
-            logger.error(f"Git pull failed: {output}")
-            return False, output
-    except Exception as e:
-        logger.error(f"Error during git pull: {str(e)}")
-        return False, str(e)
 
 def git_push(force=False):
     """Push changes to the remote repository"""
     try:
         logger.info("Starting git push operation")
         
-        # Check for changes
-        success, status = run_git_command("git status --porcelain")
-        if not status and not force:
-            logger.info("No changes to commit")
-            return True, "No changes to commit"
-
-        # Exclude workflow files from commit
-        success, _ = run_git_command("git reset -- .github/workflows/")
-        
-        # Add remaining changes
-        success, _ = run_git_command("git add .")
-        if not success:
-            return False, "Failed to stage changes"
+        # Add all changes except workflow files
+        run_git_command("git add --all")
+        run_git_command("git reset -- .github/workflows/")
         
         # Create commit message
         commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         
         # Commit changes
-        success, output = run_git_command(f'git commit -m "{commit_message}"')
-        if not success and "nothing to commit" not in output:
-            return False, f"Failed to commit: {output}"
+        _, output = run_git_command(f'git commit -m "{commit_message}"', check=False)
+        if "nothing to commit" not in output:
+            logger.info("Changes committed successfully")
         
-        # Push changes with force if requested
+        # Force push to remote
         push_command = "git push -u origin main --force" if force else "git push -u origin main"
         success, output = run_git_command(push_command)
-        if not success:
-            if "workflow" in output:
-                logger.warning("Skipping workflow files due to permission restrictions")
-                return True, "Changes pushed successfully (excluding workflow files)"
-            return False, f"Failed to push: {output}"
         
-        logger.info(f"Git push completed: {output}")
-        return True, output
+        if success:
+            logger.info("Git push completed successfully")
+            return True, "Repository synchronized successfully"
+        else:
+            logger.error(f"Push failed: {output}")
+            return False, f"Push failed: {output}"
+            
     except Exception as e:
         logger.error(f"Error during git push: {str(e)}")
         return False, str(e)
 
-def sync_repository(force_push=False):
-    """Synchronize repository by pulling and pushing changes"""
+def sync_repository(force_push=True):
+    """Synchronize repository by pushing changes with force"""
     # Setup git configuration first
     if not setup_git_config():
         return False, "Failed to setup git configuration"
@@ -144,16 +108,10 @@ def sync_repository(force_push=False):
     if not initialize_repository():
         return False, "Failed to initialize repository"
     
-    # Pull changes (skip if force pushing)
-    if not force_push:
-        pull_success, pull_message = git_pull()
-        if not pull_success and "No remote branch yet" not in pull_message:
-            return False, f"Pull failed: {pull_message}"
-    
-    # Push changes
-    push_success, push_message = git_push(force=force_push)
-    if not push_success:
-        return False, f"Push failed: {push_message}"
+    # Push changes with force
+    success, message = git_push(force=force_push)
+    if not success:
+        return False, f"Push failed: {message}"
     
     return True, "Repository synchronized successfully"
 
