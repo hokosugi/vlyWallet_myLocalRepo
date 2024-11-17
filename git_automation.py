@@ -145,67 +145,75 @@ def initialize_repository():
         logger.error(f"Error initializing repository: {str(e)}")
         return False
 
-def git_push(force=False):
-    """Push changes to the remote repository"""
+def create_and_push_replit_branch():
+    """Create and push replit branch to GitHub"""
     try:
-        logger.info("Starting git push operation")
+        logger.info("Starting replit branch creation process")
         
-        # Ensure workflow files are properly ignored
+        # First, commit any pending changes
+        run_git_command("git add .")
+        run_git_command('git commit -m "Save changes before replit branch creation"', check=False)
+        
+        # Fetch latest changes from remote
+        run_git_command("git fetch origin")
+        
+        # Switch to main branch and pull latest changes
+        success, output = run_git_command("git checkout main")
+        if not success:
+            logger.error(f"Failed to switch to main branch: {output}")
+            return False, output
+        
+        run_git_command("git pull origin main")
+        
+        # Delete local replit branch if it exists
+        run_git_command("git branch -D replit", check=False)
+        
+        # Delete remote replit branch if it exists
+        run_git_command("git push origin --delete replit", check=False)
+        
+        # Create and switch to new replit branch
+        success, output = run_git_command("git checkout -b replit")
+        if not success:
+            logger.error(f"Failed to create replit branch: {output}")
+            return False, output
+        
+        # Ensure workflow files are ignored
         ensure_workflow_files_ignored()
         
-        # Add all changes except ignored files
-        run_git_command("git add --all")
+        # Add all changes
+        run_git_command("git add .")
         
         # Create commit message
-        commit_message = f"Automated update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        commit_message = f"Initialize replit branch: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        run_git_command(f'git commit -m "{commit_message}"', check=False)
         
-        # Commit changes
-        _, output = run_git_command(f'git commit -m "{commit_message}"', check=False)
-        if "nothing to commit" not in output:
-            logger.info("Changes committed successfully")
-        
-        # Temporarily disable branch protection if force pushing
-        if force:
-            if not disable_branch_protection():
-                logger.error("Failed to disable branch protection")
-                return False, "Failed to disable branch protection"
-            logger.info("Branch protection disabled successfully")
-        
-        # Push changes to remote
-        push_command = "git push -u origin main --force" if force else "git push -u origin main"
-        success, output = run_git_command(push_command)
+        # Force push new branch to remote
+        success, output = run_git_command("git push -u origin replit --force")
         
         if success:
-            logger.info("Git push completed successfully")
-            return True, "Repository synchronized successfully"
+            logger.info("Replit branch created and pushed successfully")
+            return True, "Replit branch created and pushed successfully"
         else:
-            logger.error(f"Push failed: {output}")
-            return False, f"Push failed: {output}"
+            logger.error(f"Failed to push replit branch: {output}")
+            return False, output
             
     except Exception as e:
-        logger.error(f"Error during git push: {str(e)}")
+        logger.error(f"Error creating replit branch: {str(e)}")
         return False, str(e)
 
-def sync_repository(force_push=True):
-    """Synchronize repository by pushing changes with force"""
+if __name__ == "__main__":
     # Setup git configuration first
     if not setup_git_config():
-        return False, "Failed to setup git configuration"
-    
+        print("Failed to setup git configuration")
+        exit(1)
+        
     # Initialize repository if needed
     if not initialize_repository():
-        return False, "Failed to initialize repository"
+        print("Failed to initialize repository")
+        exit(1)
     
-    # Push changes with force
-    success, message = git_push(force=force_push)
-    if not success:
-        return False, f"Push failed: {message}"
-    
-    return True, "Repository synchronized successfully"
-
-if __name__ == "__main__":
-    # Execute force push
-    success, message = sync_repository(force_push=True)
+    # Create and push replit branch
+    success, message = create_and_push_replit_branch()
     if success:
         logger.info(message)
         print(f"Success: {message}")
