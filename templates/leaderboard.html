@@ -5,7 +5,7 @@
     <div class="col-12 mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <h2>Leaderboard</h2>
-            <a href="{{ url_for('export_csv') }}" class="btn btn-secondary">Export CSV</a>
+            
         </div>
     </div>
     
@@ -29,8 +29,8 @@
                             {% for t in transactions_points %}
                             <tr>
                                 <td>{{ loop.index }}</td>
-                                <td>{{ t.user_id }}</td>
-                                <td>{{ t.points }}</td>
+                                <td>{{ t.vly_user_id }}</td>
+                                <td>{{ t.tx_count }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -60,8 +60,8 @@
                             {% for t in transactions_count %}
                             <tr>
                                 <td>{{ loop.index }}</td>
-                                <td>{{ t.user_id }}</td>
-                                <td>{{ t.count }}</td>
+                                <td>{{ t.vly_user_id }}</td>
+                                <td>{{ t.tx_count }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -91,8 +91,8 @@
                             {% for t in transactions_amount %}
                             <tr>
                                 <td>{{ loop.index }}</td>
-                                <td>{{ t.user_id }}</td>
-                                <td>${{ "%.2f"|format(t.amount) }}</td>
+                                <td>{{ t.vly_user_id }}</td>
+                                <td>${{ "%.2f"|format(t.tx_count) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -108,9 +108,9 @@
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const pointsData = {{ transactions_points|tojson }};
-        const countData = {{ transactions_count|tojson }};
-        const amountData = {{ transactions_amount|tojson }};
+        const pointsData = {{ transactions_points|tojson|safe }};
+        const countData = {{ transactions_count|tojson|safe}};
+        const amountData = {{ transactions_amount|tojson|safe}};
         createLeaderboardCharts(pointsData, countData, amountData);
     });
 </script>

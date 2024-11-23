@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import os
 from flask import Flask, request, session
 from database import db
@@ -5,6 +6,16 @@ import logging
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import Babel
 from flask_login import LoginManager
+from models import db, Admin
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+
+
+load_dotenv()
+print(f"ADMIN_PASSWORD set: {'ADMIN_PASSWORD' in os.environ}")
+# db = SQLAlchemy()
+migrate = Migrate()
 
 # Configure logging
 logging.basicConfig(
@@ -20,18 +31,23 @@ def get_locale():
 
 def create_app():
     flask_app = Flask(__name__)
-    
+    # flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ueyamamasashi@localhost/postgres'
+    # flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+    # migrate = Migrate(flask_app, db)
+
     # Configure Flask app
     flask_app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
     flask_app.debug = True
-    
+
     # Initialize Babel
     babel = Babel(flask_app, locale_selector=get_locale)
-    
+
     # Initialize Login Manager
     login_manager.init_app(flask_app)
     login_manager.login_view = 'admin_login'
-    
+
     # Database configuration with error handling
     try:
         database_url = os.environ.get("DATABASE_URL")
@@ -39,7 +55,7 @@ def create_app():
             logger.error("DATABASE_URL environment variable not set!")
             raise ValueError("DATABASE_URL must be set")
         
-        logger.debug(f"Configuring database with URL: {database_url.split('@')[1]}")
+        logger.debug(f"Configuring database with URL: {database_url}")
         
         # Configure SQLAlchemy
         flask_app.config["SQLALCHEMY_DATABASE_URI"] = database_url
@@ -52,14 +68,14 @@ def create_app():
         }
         flask_app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         
-        # Initialize database
         db.init_app(flask_app)
-        
+        migrate.init_app(flask_app, db)
+
         with flask_app.app_context():
             # Import models and views after app initialization
             from models import User, Transaction, Admin
             from views import register_routes
-            from vly_api import update_transactions
+            from update_transactions import update_transactions
             from scheduler import start_scheduler
             
             @login_manager.user_loader
@@ -111,11 +127,14 @@ def create_app():
     except Exception as e:
         logger.error(f"Failed to initialize application: {str(e)}")
         raise
-    
+
+
+    def index():
+        return "Welcome to VlyWallet Leaderboard"
     return flask_app
 
-app = create_app()
+flask_app = create_app()
 
 if __name__ == "__main__":
     logger.info("Starting Flask application...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    flask_app.run(host="0.0.0.0", port=5000, debug=True)

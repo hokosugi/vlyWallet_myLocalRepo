@@ -18,16 +18,19 @@ def register_routes(app):
     def register():
         if request.method == 'POST':
             user_id = request.form.get('user_id')
+            print(f"request.form.get: {user_id}")
             if not user_id:
-                flash(_('Please enter a valid User ID'), 'error')
+                flash(_('Please enter a valid vly_User_ID'), 'error')
                 return redirect(url_for('register'))
             
-            existing_user = User.query.filter_by(id=user_id).first()
+            existing_user = User.query.filter_by(vly_user_id=user_id).first()
             if existing_user:
                 flash(_('User ID already registered'), 'error')
                 return redirect(url_for('register'))
             
-            new_user = User(id=user_id)
+            new_user = User(
+                vly_user_id=user_id,
+                )
             db.session.add(new_user)
             try:
                 db.session.commit()
@@ -35,6 +38,7 @@ def register_routes(app):
                 return redirect(url_for('leaderboard'))
             except Exception as e:
                 db.session.rollback()
+                print(f"Database error: {str(e)}")  # 具体的なDBエラーを確認
                 flash(_('Error registering user. Please try again.'), 'error')
                 return redirect(url_for('register'))
         
@@ -123,73 +127,22 @@ def register_routes(app):
     @login_required
     def leaderboard():
         try:
-            transactions_points = Transaction.query.order_by(Transaction.points.desc()).limit(10).all()
-            transactions_count = Transaction.query.order_by(Transaction.count.desc()).limit(10).all()
-            transactions_amount = Transaction.query.order_by(Transaction.amount.desc()).limit(10).all()
+            transactions_vly_user_id = Transaction.query.order_by(Transaction.tx_count.desc()).limit(10).all()
+            transactions_count = Transaction.query.order_by(Transaction.tx_count.desc()).limit(10).all()
+            transactions_last_updated = Transaction.query.order_by(Transaction.tx_count.desc()).limit(10).all()
 
-            points_data = [{'user_id': t.user_id, 'points': t.points} for t in transactions_points]
-            count_data = [{'user_id': t.user_id, 'count': t.count} for t in transactions_count]
-            amount_data = [{'user_id': t.user_id, 'amount': t.amount} for t in transactions_amount]
-
+            
+            count_data = [{'vly_user_id': t.vly_user_id, 'tx_count': t.tx_count} for t in transactions_count]
+            
             return render_template('leaderboard.html', 
-                               transactions_points=points_data,
+                               transactions_points=count_data,
                                transactions_count=count_data,
-                               transactions_amount=amount_data)
+                               transactions_amount=count_data)
+                               
+                       
         except Exception as e:
+            print(f"Leaderboard error: {str(e)}")  # ターミナルにエラー詳細を出力
+            app.logger.error(f"Leaderboard error: {str(e)}")  # ログファイルにエラー詳細を記録
             flash(_('Error loading leaderboard data.'), 'error')
             return redirect(url_for('index'))
-
-    @app.route('/transaction-history', methods=['GET', 'POST'])
-    def transaction_history_search():
-        if request.method == 'POST':
-            user_id = request.form.get('user_id')
-            if not user_id:
-                flash(_('Please enter a valid User ID'), 'error')
-                return redirect(url_for('transaction_history_search'))
-            return redirect(url_for('transaction_history', user_id=user_id))
-        return render_template('transaction_history_search.html')
-
-    @app.route('/transaction-history/<user_id>')
-    def transaction_history(user_id):
-        try:
-            user = User.query.get_or_404(user_id)
-            transaction = Transaction.query.filter_by(user_id=user_id).first()
-            
-            if not transaction:
-                flash(_('No transaction history found for this user.'), 'error')
-                return redirect(url_for('transaction_history_search'))
-                
-            return render_template('transaction_history.html', 
-                               user=user,
-                               transaction=transaction)
-        except Exception as e:
-            flash(_('Error loading transaction history.'), 'error')
-            return redirect(url_for('transaction_history_search'))
-
-    @app.route('/export-csv')
-    @login_required
-    def export_csv():
-        try:
-            output = BytesIO()
-            string_buffer = StringIO()
-            writer = csv.writer(string_buffer)
-            
-            writer.writerow([_('User ID'), _('Transaction Count'), _('Total Amount'), _('Points'), _('Last Updated')])
-            
-            transactions = Transaction.query.all()
-            for t in transactions:
-                writer.writerow([str(t.user_id), t.count, t.amount, t.points, t.last_updated])
-            
-            output.write(string_buffer.getvalue().encode('utf-8'))
-            string_buffer.close()
-            output.seek(0)
-            
-            return send_file(
-                output,
-                mimetype='text/csv',
-                as_attachment=True,
-                download_name=f'leaderboard_{datetime.now().strftime("%Y%m%d")}.csv'
-            )
-        except Exception as e:
-            flash(_('Error exporting data.'), 'error')
-            return redirect(url_for('leaderboard'))
+    
