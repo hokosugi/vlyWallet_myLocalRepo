@@ -75,7 +75,7 @@ def create_app():
             # Import models and views after app initialization
             from models import User, Transaction, Admin
             from views import register_routes
-            from update_transactions import update_transactions
+            from scheduler import run_update_transactions
             from scheduler import start_scheduler
             
             @login_manager.user_loader
@@ -109,8 +109,8 @@ def create_app():
                 db.session.commit()
                 logger.info("Default admin user created/reset with environment password")
                 
-                # Start scheduler for weekly updates
-                start_scheduler(update_transactions)
+                # Start scheduler for a day updates
+                start_scheduler(run_update_transactions)
                 logger.info("Transaction update scheduler started")
                 
             except SQLAlchemyError as e:

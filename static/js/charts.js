@@ -1,5 +1,5 @@
 // Leaderboard Charts
-function createLeaderboardCharts(pointsData, countData, amountData) {
+function createLeaderboardCharts(countData) {
     // Points Distribution Chart
     new Chart(document.getElementById('pointsChart'), {
         type: 'bar',

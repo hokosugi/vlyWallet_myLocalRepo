@@ -28,10 +28,10 @@ function updateLeaderboardData(data) {
     updateLeaderboardEntry('amount', data.user_id, data.amount);
     
     // Refresh charts
-    const pointsData = getLeaderboardData('points');
+    // const pointsData = getLeaderboardData('points');
     const countData = getLeaderboardData('count');
-    const amountData = getLeaderboardData('amount');
-    createLeaderboardCharts(pointsData, countData, amountData);
+    // const amountData = getLeaderboardData('amount');
+    createLeaderboardCharts(countData);
 }
 
 function updateLeaderboardEntry(type, userId, value) {

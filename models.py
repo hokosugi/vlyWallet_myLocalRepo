@@ -1,4 +1,3 @@
-from app import db
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -71,12 +70,11 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vly_user_id = db.Column(db.String(64), db.ForeignKey('user.vly_user_id'), nullable=False)
     tx_count = db.Column(db.Integer, default=0)
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-# テスト用のin-memoryデータベース設定
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)# テスト用のin-memoryデータベース設定
 # engine = create_engine('sqlite:///:memory:')
 # Session = sessionmaker(bind=engine)
 # session = Session()
 
 # データベーステーブルの作成
 # db.create_all(engine)
+

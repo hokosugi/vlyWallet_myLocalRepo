@@ -1,6 +1,8 @@
 from models import db, User, Transaction
 from datetime import datetime
 import logging
+from app import create_app
+from models import User
 from vly_wallet_api import main as get_vly_transactions
 
 logger = logging.getLogger(__name__)
@@ -10,6 +12,7 @@ def update_transactions():
     """
     Update transaction data for all users based on the results from vly_api_like_tx.py
     """
+    
     users = User.query.all()
     current_time = datetime.utcnow()
 
@@ -39,9 +42,9 @@ def update_transactions():
 
             # Update or create transaction record
             transaction = Transaction.query.filter_by(
-                user_id_vly=user.vly_user_id).first()
+                vly_user_id=user.vly_user_id).first()
             if not transaction:
-                transaction = Transaction(user_id_vly=user.vly_user_id)
+                transaction = Transaction(vly_user_id=user.vly_user_id)
                 db.session.add(transaction)
 
             # Update transaction count
@@ -74,4 +77,6 @@ def update_transactions():
 
 
 if __name__ == "__main__":
-    update_transactions()
+    app = create_app()  # アプリケーションを作成
+    with app.app_context(): 
+        update_transactions()

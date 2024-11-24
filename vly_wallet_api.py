@@ -125,7 +125,7 @@ def main(user_ids: List[str]) -> Dict[str, Optional[int]]:
     agent = Agent(ano, client)
     like_index = "mvtuy-wiaaa-aaaam-adh7a-cai"
     query_amount = 100
-    cutoff_date = datetime(2024, 11, 9, 0, 0, 0).timestamp()
+    cutoff_date = datetime(2024, 11, 1, 0, 0, 0).timestamp()
 
     tx_counts = {}
     for user_id, address in addresses.items():
@@ -142,7 +142,7 @@ def main(user_ids: List[str]) -> Dict[str, Optional[int]]:
 # 使用例
 if __name__ == "__main__":
     # テスト用のユーザーID配列
-    test_user_ids = ["mugeimunou", "realDonaldTrump"]
+    test_user_ids = ["mugeimunou", "realDonaldTrump", "test0123", "hude_icp"]
     result = main(test_user_ids)
     print("\nトランザクション数の結果:")
     print(result)
