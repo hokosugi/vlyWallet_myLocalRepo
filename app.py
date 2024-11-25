@@ -11,10 +11,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 
-
 load_dotenv()
 print(f"ADMIN_PASSWORD set: {'ADMIN_PASSWORD' in os.environ}")
 # db = SQLAlchemy()
+
 migrate = Migrate()
 
 # Configure logging
@@ -23,6 +23,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 login_manager = LoginManager()
 
@@ -83,6 +84,7 @@ def create_app():
                 return Admin.query.get(int(user_id))
             
             try:
+
                 # Test database connection
                 db.engine.connect()
                 logger.info("Successfully connected to database")
