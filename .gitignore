@@ -39,3 +39,4 @@ instance/
 .github/workflows/ci.yml
 
 .ebextensions/python.config
+new_venv/
