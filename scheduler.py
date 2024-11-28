@@ -18,7 +18,7 @@ def start_scheduler(run_update_transactions):
     try:
         scheduler.add_job(run_update_transactions, 
                         trigger="interval", 
-                        hours=1,
+                        hours=6,
                         id='update_transactions_job',
                         name='Update transaction data everyday')
         scheduler.start()

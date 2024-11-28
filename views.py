@@ -2,10 +2,12 @@ from flask import render_template, request, redirect, url_for, flash, send_file,
 from models import db, User, Transaction, Admin
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_babel import gettext as _
-import csv
 from io import BytesIO, StringIO
 from datetime import datetime
 from flask_wtf.csrf import CSRFProtect
+import logging
+
+logger = logging.getLogger(__name__)
 
 def register_routes(app):
     csrf = CSRFProtect(app)
@@ -46,18 +48,27 @@ def register_routes(app):
 
     @app.route('/admin/login', methods=['GET', 'POST'])
     def admin_login():
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            admin = Admin.query.filter_by(username=username).first()
-            
-            if admin and admin.check_password(password):
-                login_user(admin)
-                flash(_('Login successful!'), 'success')
-                return redirect(url_for('leaderboard'))
-            
-            flash(_('Invalid username or password'), 'error')
-        return render_template('admin_login.html')
+        try:
+            if request.method == 'POST':
+                username = request.form.get('username')
+                password = request.form.get('password')
+                admin = Admin.query.filter_by(username=username).first()
+                
+                if admin and admin.check_password(password):
+                    logger.info(f"Admin found: {admin}")
+                    logger.info(f"Password check passed for: {admin.username}")
+                    try:
+                        login_user(admin)
+                        flash(_('Login successful!'), 'success')
+                    except Exception as e:
+                        logger.error(f"login_user failed: {str(e)}")
+                    return redirect(url_for('leaderboard'))
+                
+                flash(_('Invalid username or password'), 'error')
+                
+            return render_template('admin_login.html')
+        except Exception as e:
+            print(f"login error: {str(e)}") 
 
     @app.route('/admin/logout')
     @login_required

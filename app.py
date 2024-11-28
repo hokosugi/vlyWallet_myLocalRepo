@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 from flask import Flask, request, session
-from database import db
 import logging
 from sqlalchemy.exc import SQLAlchemyError
 from flask_babel import Babel
@@ -50,8 +49,13 @@ def create_app():
     login_manager.login_view = 'admin_login'
 
     # Database configuration with error handling
+    DB_HOST = os.getenv('RDS_HOSTNAME')
+    DB_PORT = os.getenv('RDS_PORT')
+    DB_NAME = os.getenv('RDS_DB_NAME')
+    DB_USER = os.getenv('RDS_USERNAME')
+    DB_PASSWORD = os.getenv('RDS_PASSWORD')
     try:
-        database_url = os.environ.get("DATABASE_URL")
+        database_url = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         if not database_url:
             logger.error("DATABASE_URL environment variable not set!")
             raise ValueError("DATABASE_URL must be set")
@@ -88,15 +92,18 @@ def create_app():
                 # Test database connection
                 db.engine.connect()
                 logger.info("Successfully connected to database")
-                
-                # Create database tables
-                db.create_all()
-                logger.info("Database tables created successfully")
-                
-                # Remove existing admin if exists
-                Admin.query.filter_by(username='admin').delete()
-                db.session.commit()
-                logger.info("Existing admin user removed")
+                try:
+                    # Create database tables
+                    db.create_all()
+                    logger.info("Database tables created successfully")
+                    
+                    # Remove existing admin if exists
+                    Admin.query.filter_by(username='admin').delete()
+                    db.session.commit()
+                    logger.info("Existing admin user removed")
+                except SQLAlchemyError as e:
+                    logger.error(f"Database operation failed: {str(e)}")
+                    db.session.rollback()
 
                 # Get admin password from environment variable
                 admin_password = os.environ.get('ADMIN_PASSWORD')
