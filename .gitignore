@@ -40,3 +40,7 @@ instance/
 
 .ebextensions/python.config
 new_venv/
+new_venv/bin/
+new_venv/include/
+new_venv/lib/
+new_venv/pyvenv.cfg
